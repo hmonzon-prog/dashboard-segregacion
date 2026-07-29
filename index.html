@@ -72,6 +72,11 @@ tr:hover{background:#f8f9ff}
 <div style="overflow-x:auto"><table><thead><tr><th>SKU</th><th>Descripci&oacute;n</th><th>Total</th><th>Altura</th><th>Piso</th><th>Qty</th><th>Destino</th><th>Estado</th><th>Ubicaci&oacute;n</th><th>Fecha</th></tr></thead><tbody id="tableBody"></tbody></table></div>
 </div>
 
+<div class="table-wrap hidden" id="summaryWrap">
+<h3>Resumen por Fecha</h3>
+<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>SKUs segregados</th><th>Unidades</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
+</div>
+
 <div id="errorContainer"></div>
 </div>
 
@@ -128,12 +133,33 @@ document.getElementById('loadingScreen').classList.add('hidden');
 document.getElementById('cards').classList.remove('hidden');
 document.getElementById('charts').classList.remove('hidden');
 document.getElementById('tableWrap').classList.remove('hidden');
+document.getElementById('summaryWrap').classList.remove('hidden');
 
 document.getElementById('totalSku').textContent = total;
 document.getElementById('okSku').textContent = ok;
 document.getElementById('pendSku').textContent = pend;
 document.getElementById('nookSku').textContent = nook;
 document.getElementById('statusBar').innerHTML = 'Google Sheets (Altura + Piso) conectado | ' + total + ' SKUs | &Uacute;ltima segregaci&oacute;n: ' + (lastDate || 'N/A');
+
+var dateSummary = {};
+okRows.forEach(function(r) {
+var f = ((r.FECHA || r.fecha || '')).trim();
+if (!f) return;
+if (!dateSummary[f]) dateSummary[f] = { skus: 0, unidades: 0 };
+dateSummary[f].skus++;
+var qty = parseInt((r['qty segregada'] || '0').replace(/\./g,''), 10);
+dateSummary[f].unidades += isNaN(qty) ? 0 : qty;
+});
+var sortedSummary = Object.keys(dateSummary).sort(function(a,b) {
+var da = a.split('/'), db = b.split('/');
+if (!da[2]||!db[2]) return 0;
+return new Date(db[2],db[1]-1,db[0]) - new Date(da[2],da[1]-1,da[0]);
+});
+var sumHtml = '';
+sortedSummary.forEach(function(d) {
+sumHtml += '<tr><td>'+esc(d)+'</td><td>'+dateSummary[d].skus+'</td><td>'+dateSummary[d].unidades+'</td></tr>';
+});
+document.getElementById('summaryBody').innerHTML = sumHtml;
 
 var pieCtx = document.getElementById('pieChart').getContext('2d');
 if (pieChart) pieChart.destroy();
