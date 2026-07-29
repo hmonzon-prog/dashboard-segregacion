@@ -50,6 +50,11 @@ tr:hover{background:#f8f9ff}
 <h1>Dashboard Segregaci&oacute;n de SKUs</h1>
 <div class="sub" id="statusBar">Cargando...</div>
 
+<div class="table-wrap hidden" id="summaryWrap" style="margin-bottom:24px">
+<h3>Resumen por Fecha</h3>
+<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>SKUs segregados</th><th>Unidades</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
+</div>
+
 <div id="loadingScreen" class="loading">
 <div class="spinner"></div>
 <p>Conectando con Google Sheets...</p>
@@ -70,11 +75,6 @@ tr:hover{background:#f8f9ff}
 <div class="table-wrap hidden" id="tableWrap">
 <h3>&Uacute;ltimos segregados</h3>
 <div style="overflow-x:auto"><table><thead><tr><th>SKU</th><th>Descripci&oacute;n</th><th>Total</th><th>Altura</th><th>Piso</th><th>Qty</th><th>Destino</th><th>Estado</th><th>Ubicaci&oacute;n</th><th>Fecha</th></tr></thead><tbody id="tableBody"></tbody></table></div>
-</div>
-
-<div class="table-wrap hidden" id="summaryWrap">
-<h3>Resumen por Fecha</h3>
-<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>SKUs segregados</th><th>Unidades</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
 </div>
 
 <div id="errorContainer"></div>
