@@ -114,8 +114,8 @@ var dateCounts = {}, lastDate = '', okRows = [];
 rows.forEach(function(r) {
 if (!r.Artículo) return;
 total++;
-var estado = (r.OB || '').trim().toUpperCase();
-var fecha = (r.FECHA || '').trim();
+var estado = ((r.OB || r.ob || '')).trim().toUpperCase();
+var fecha = ((r.FECHA || r.fecha || '')).trim();
 if (estado === 'OK' || estado === 'NOOK') {
 if (fecha) dateCounts[fecha] = (dateCounts[fecha] || 0) + 1;
 }
@@ -158,14 +158,14 @@ options: { responsive: true, plugins: { legend: { display: false } }, scales: { 
 
 var html = '';
 okRows.sort(function(a,b) {
-var fa=(a.FECHA||'').trim().split('/'), fb=(b.FECHA||'').trim().split('/');
+var fa=((a.FECHA||a.fecha||'')).trim().split('/'), fb=((b.FECHA||b.fecha||'')).trim().split('/');
 if (!fa[2]) return 1; if (!fb[2]) return -1;
 return new Date(fb[2],fb[1]-1,fb[0]) - new Date(fa[2],fa[1]-1,fa[0]);
 });
 okRows.slice(0,150).forEach(function(r) {
-var est = (r.OB||'').trim().toUpperCase();
+var est = ((r.OB||r.ob||'')).trim().toUpperCase();
 var badge = est==='OK'?'<span class="badge ok">OK</span>':est==='NOOK'?'<span class="badge nook">NOOK</span>':'<span class="badge pend">Pend</span>';
-html += '<tr><td>'+esc(r.Artículo)+'</td><td>'+esc(r.Descripción)+'</td><td>'+esc(r.Total)+'</td><td>'+esc(r.Altura)+'</td><td>'+esc(r.Piso)+'</td><td>'+esc(r['qty segregada']||'0')+'</td><td>'+esc(r.destino)+'</td><td>'+badge+'</td><td><span class="badge '+(r._sheet==='Piso'?'pend':'ok')+'">'+esc(r._sheet||'-')+'</span></td><td>'+esc(r.FECHA)+'</td></tr>';
+html += '<tr><td>'+esc(r.Artículo)+'</td><td>'+esc(r.Descripción)+'</td><td>'+esc(r.Total)+'</td><td>'+esc(r.Altura)+'</td><td>'+esc(r.Piso)+'</td><td>'+esc(r['qty segregada']||'0')+'</td><td>'+esc(r.destino)+'</td><td>'+badge+'</td><td><span class="badge '+(r._sheet==='Piso'?'pend':'ok')+'">'+esc(r._sheet||'-')+'</span></td><td>'+esc((r.FECHA||r.fecha||''))+'</td></tr>';
 });
 document.getElementById('tableBody').innerHTML = html || '<tr><td colspan="10" style="text-align:center;padding:20px;color:#888">Sin datos</td></tr>';
 }
