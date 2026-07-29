@@ -69,30 +69,43 @@ tr:hover{background:#f8f9ff}
 
 <div class="table-wrap hidden" id="tableWrap">
 <h3>&Uacute;ltimos segregados</h3>
-<div style="overflow-x:auto"><table><thead><tr><th>SKU</th><th>Descripci&oacute;n</th><th>Total</th><th>Altura</th><th>Piso</th><th>Qty</th><th>Destino</th><th>Estado</th><th>Fecha</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+<div style="overflow-x:auto"><table><thead><tr><th>SKU</th><th>Descripci&oacute;n</th><th>Total</th><th>Altura</th><th>Piso</th><th>Qty</th><th>Destino</th><th>Estado</th><th>Ubicaci&oacute;n</th><th>Fecha</th></tr></thead><tbody id="tableBody"></tbody></table></div>
 </div>
 
 <div id="errorContainer"></div>
 </div>
 
 <script>
-var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?output=csv';
+var CSV_URLS = [
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?output=csv',
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?gid=2052039607&single=true&output=csv'
+];
+var SHEET_NAMES = ['Altura', 'Piso'];
 var pieChart, barChart;
 
 function loadData() {
 document.getElementById('statusBar').textContent = 'Conectando...';
-fetch(CSV_URL, { mode: 'cors', cache: 'no-cache' })
-.then(function(r) { if (!r.ok) throw new Error(); return r.text(); })
-.then(processCSV)
+Promise.all(CSV_URLS.map(function(url, i) {
+return fetch(url, { mode: 'cors', cache: 'no-cache' })
+.then(function(r) { if (!r.ok) throw new Error('Error hoja ' + SHEET_NAMES[i]); return r.text(); });
+}))
+.then(function(texts) {
+var allRows = [];
+texts.forEach(function(text, i) {
+text = text.replace(/"OK\r?\n"/g, '"OK"');
+var rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+rows.forEach(function(r) { if (r.Artículo) r._sheet = SHEET_NAMES[i]; });
+allRows = allRows.concat(rows);
+});
+processRows(allRows);
+})
 .catch(function() {
 document.getElementById('loadingScreen').classList.add('hidden');
 showServerError();
 });
 }
 
-function processCSV(text) {
-text = text.replace(/"OK\r?\n"/g, '"OK"');
-var rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+function processRows(rows) {
 if (!rows || rows.length < 2) throw new Error('Sin datos');
 
 var total = 0, ok = 0, nook = 0, pend = 0;
@@ -120,7 +133,7 @@ document.getElementById('totalSku').textContent = total;
 document.getElementById('okSku').textContent = ok;
 document.getElementById('pendSku').textContent = pend;
 document.getElementById('nookSku').textContent = nook;
-document.getElementById('statusBar').innerHTML = 'Google Sheets conectado | ' + total + ' SKUs | &Uacute;ltima segregaci&oacute;n: ' + (lastDate || 'N/A');
+document.getElementById('statusBar').innerHTML = 'Google Sheets (Altura + Piso) conectado | ' + total + ' SKUs | &Uacute;ltima segregaci&oacute;n: ' + (lastDate || 'N/A');
 
 var pieCtx = document.getElementById('pieChart').getContext('2d');
 if (pieChart) pieChart.destroy();
@@ -152,9 +165,9 @@ return new Date(fb[2],fb[1]-1,fb[0]) - new Date(fa[2],fa[1]-1,fa[0]);
 okRows.slice(0,150).forEach(function(r) {
 var est = (r.OB||'').trim().toUpperCase();
 var badge = est==='OK'?'<span class="badge ok">OK</span>':est==='NOOK'?'<span class="badge nook">NOOK</span>':'<span class="badge pend">Pend</span>';
-html += '<tr><td>'+esc(r.Artículo)+'</td><td>'+esc(r.Descripción)+'</td><td>'+esc(r.Total)+'</td><td>'+esc(r.Altura)+'</td><td>'+esc(r.Piso)+'</td><td>'+esc(r['qty segregada']||'0')+'</td><td>'+esc(r.destino)+'</td><td>'+badge+'</td><td>'+esc(r.FECHA)+'</td></tr>';
+html += '<tr><td>'+esc(r.Artículo)+'</td><td>'+esc(r.Descripción)+'</td><td>'+esc(r.Total)+'</td><td>'+esc(r.Altura)+'</td><td>'+esc(r.Piso)+'</td><td>'+esc(r['qty segregada']||'0')+'</td><td>'+esc(r.destino)+'</td><td>'+badge+'</td><td><span class="badge '+(r._sheet==='Piso'?'pend':'ok')+'">'+esc(r._sheet||'-')+'</span></td><td>'+esc(r.FECHA)+'</td></tr>';
 });
-document.getElementById('tableBody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;padding:20px;color:#888">Sin datos</td></tr>';
+document.getElementById('tableBody').innerHTML = html || '<tr><td colspan="10" style="text-align:center;padding:20px;color:#888">Sin datos</td></tr>';
 }
 
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
