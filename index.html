@@ -88,9 +88,10 @@ tr:hover{background:#f8f9ff}
 </div>
 
 <script>
+var ts = Date.now();
 var CSV_URLS = [
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?output=csv',
-'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?gid=2052039607&single=true&output=csv'
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?output=csv&_=' + ts,
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?gid=2052039607&single=true&output=csv&_=' + ts
 ];
 var SHEET_NAMES = ['Altura', 'Piso'];
 var pieChart, barChart;
