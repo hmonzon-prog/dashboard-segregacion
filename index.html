@@ -297,7 +297,7 @@ document.getElementById('statusBar').textContent = 'Error de conexi&oacute;n';
 // Load PapaParse first
 var s = document.createElement('script');
 s.src = 'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js';
-s.onload = loadData;
+s.onload = function() { loadData(); setInterval(function() { ts = Date.now(); CSV_URLS[0] = CSV_URLS[0].split('&_=')[0] + '&_=' + ts; CSV_URLS[1] = CSV_URLS[1].split('&_=')[0] + '&_=' + ts; loadData(); }, 60000); };
 s.onerror = function() {
 document.getElementById('loadingScreen').innerHTML = '<p style="color:#e63946">Error al cargar librer&iacute;as. Verific&aacute; tu conexi&oacute;n a internet.</p>';
 };
