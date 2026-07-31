@@ -97,7 +97,7 @@ var CSV_URLS = [
 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?output=csv&_=' + ts,
 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJLVNYz6EJMEALtuB-p1s00yWgXzi-3vCgRunJ_eH8TuTqGZytdQmylsCpfXuAhQSz0qeJwRE5xNOe/pub?gid=2052039607&single=true&output=csv&_=' + ts
 ];
-var SHEET_NAMES = ['Piso', 'Altura'];
+var SHEET_NAMES = ['Altura', 'Piso'];
 var pieChart, barChart;
 
 function loadData() {
@@ -111,7 +111,11 @@ var allRows = [];
 texts.forEach(function(text, i) {
 text = text.replace(/"OK\r?\n"/g, '"OK"');
 var rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
-rows.forEach(function(r) { if (r.Artículo) r._sheet = SHEET_NAMES[i]; });
+var firstKey = Object.keys(rows[0] || {})[0];
+rows.forEach(function(r) {
+if (firstKey !== 'Artículo' && r[firstKey]) r['Artículo'] = r[firstKey];
+if (r.Artículo) r._sheet = SHEET_NAMES[i];
+});
 allRows = allRows.concat(rows);
 });
 processRows(allRows);
