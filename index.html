@@ -142,11 +142,29 @@ else if (estado === 'NOOK') nook++;
 else pend++;
 });
 
-// Procesar pallets de altura (columnas R-U)
+// Procesar pallets de altura (columnas R-U por índice)
 var palletsMap = {};
 rows.forEach(function(r) {
-var loc = (r.locs || '').trim();
-var okNook = (r['ok/nook'] || '').trim().toLowerCase();
+var keys = Object.keys(r);
+var loc = '', okNook = '';
+for (var i = 0; i < keys.length; i++) {
+var val = r[keys[i]];
+if (keys[i] === 'locs' && val && val.trim()) {
+var v = val.trim();
+if (v.length > 0) loc = v;
+}
+if (keys[i] === 'ok/nook' && val && val.trim()) {
+okNook = val.trim().toLowerCase();
+}
+}
+// Si la columna R (locs duplicada) tiene dato, usarla
+var allKeys = Object.keys(r);
+if (allKeys.length >= 18) {
+var locR = (r[allKeys[17]] || '').trim();
+if (locR) loc = locR;
+var okR = (r[allKeys[20]] || '').trim().toLowerCase();
+if (okR) okNook = okR;
+}
 if (loc) {
 palletsMap[loc] = { status: okNook || 'pend' };
 }
