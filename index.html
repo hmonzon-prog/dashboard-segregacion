@@ -146,9 +146,8 @@ else pend++;
 var palletsMap = {};
 rows.forEach(function(r) {
 var loc = (r.locs || '').trim();
-var qtySku = (r['qty sku'] || '').trim();
 var okNook = (r['ok/nook'] || '').trim().toLowerCase();
-if (loc && qtySku) {
+if (loc) {
 palletsMap[loc] = { status: okNook || 'pend' };
 }
 });
