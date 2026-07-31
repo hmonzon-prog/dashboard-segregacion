@@ -20,6 +20,21 @@ h1{font-size:28px;margin-bottom:4px;color:#1a1a2e}
 .card.ok .num{color:#2ec4b6}.card.ok{border-left-color:#2ec4b6}
 .card.pending .num{color:#ff9f1c}.card.pending{border-left-color:#ff9f1c}
 .card.nook .num{color:#e63946}.card.nook{border-left-color:#e63946}
+.card.progress-card{border-left-color:#9b59b6}
+.card.progress-card .num{color:#9b59b6}
+.progress-section{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:24px}
+.progress-section h3{font-size:15px;margin-bottom:12px;color:#444}
+.progress-bar-container{background:#e9ecef;border-radius:10px;height:30px;overflow:hidden;margin-bottom:10px}
+.progress-bar{background:linear-gradient(90deg,#2ec4b6,#9b59b6);height:100%;border-radius:10px;transition:width 0.5s ease;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:13px}
+.progress-stats{display:flex;justify-content:space-between;font-size:13px;color:#666}
+.progress-stats span{display:flex;align-items:center;gap:6px}
+.progress-stats .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot-total{background:#4361ee}.dot-done{background:#2ec4b6}.dot-pending{background:#ff9f1c}
+.pallets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px}
+.pallet-item{padding:8px;border-radius:6px;font-size:12px;text-align:center;font-weight:600}
+.pallet-item.done{background:#d4f5f2;color:#0a8a7e}
+.pallet-item.pending{background:#fff3d6;color:#b47c00}
+.pallet-item.nook{background:#ffe0e3;color:#c1121f}
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
 @media(max-width:768px){.charts-row{grid-template-columns:1fr}}
 .chart-box{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -49,6 +64,19 @@ tr:hover{background:#f8f9ff}
 <div class="container">
 <h1>Dashboard Segregaci&oacute;n de SKUs</h1>
 <div class="sub" id="statusBar">Cargando...</div>
+
+<div class="progress-section hidden" id="palletsProgress">
+<h3>Progreso de Pallets (Altura)</h3>
+<div class="progress-bar-container">
+<div class="progress-bar" id="progressBar" style="width:0%">0%</div>
+</div>
+<div class="progress-stats">
+<span><span class="dot dot-total"></span>Total: <strong id="totalPallets">0</strong></span>
+<span><span class="dot dot-done"></span>Completados: <strong id="donePallets">0</strong></span>
+<span><span class="dot dot-pending"></span>Pendientes: <strong id="pendingPallets">0</strong></span>
+</div>
+<div class="pallets-grid" id="palletsGrid"></div>
+</div>
 
 <div class="table-wrap hidden" id="summaryWrap" style="margin-bottom:24px">
 <h3>Resumen por Fecha</h3>
@@ -140,11 +168,49 @@ else if (estado === 'NOOK') nook++;
 else pend++;
 });
 
+// Procesar pallets de altura (columnas R-U)
+var palletsMap = {};
+rows.forEach(function(r) {
+var loc = (r.locs || '').trim();
+var qtySku = (r['qty sku'] || '').trim();
+var ob = (r.ob || '').trim();
+var okNook = (r['ok/nook'] || '').trim().toLowerCase();
+if (loc && qtySku) {
+palletsMap[loc] = { qty: parseInt(qtySku) || 0, ob: ob, status: okNook || 'pend' };
+}
+});
+var palletsTotal = 0, palletsDone = 0, palletsPending = 0, palletsList = [];
+Object.keys(palletsMap).forEach(function(loc) {
+var p = palletsMap[loc];
+palletsTotal++;
+if (p.status === 'ok') palletsDone++;
+else palletsPending++;
+palletsList.push({ loc: loc, qty: p.qty, ob: p.ob, status: p.status });
+});
+palletsList.sort(function(a, b) { return b.qty - a.qty; });
+
 document.getElementById('loadingScreen').classList.add('hidden');
 document.getElementById('cards').classList.remove('hidden');
 document.getElementById('charts').classList.remove('hidden');
 document.getElementById('tableWrap').classList.remove('hidden');
 document.getElementById('summaryWrap').classList.remove('hidden');
+document.getElementById('palletsProgress').classList.remove('hidden');
+
+// Actualizar progreso de pallets
+var pct = palletsTotal > 0 ? Math.round((palletsDone / palletsTotal) * 100) : 0;
+document.getElementById('totalPallets').textContent = palletsTotal;
+document.getElementById('donePallets').textContent = palletsDone;
+document.getElementById('pendingPallets').textContent = palletsPending;
+document.getElementById('progressBar').style.width = pct + '%';
+document.getElementById('progressBar').textContent = pct + '% (' + palletsDone + '/' + palletsTotal + ')';
+var palletsHtml = '';
+palletsList.forEach(function(p) {
+var cls = p.status === 'ok' ? 'done' : (p.status === 'nook' ? 'nook' : 'pending');
+var title = p.loc + ' | Qty: ' + p.qty;
+if (p.ob) title += ' | ' + p.ob;
+palletsHtml += '<div class="pallet-item ' + cls + '" title="' + esc(title) + '">' + esc(p.loc) + '<br><small>' + p.qty + '</small></div>';
+});
+document.getElementById('palletsGrid').innerHTML = palletsHtml;
 
 document.getElementById('totalSku').textContent = total;
 document.getElementById('okSku').textContent = ok;
