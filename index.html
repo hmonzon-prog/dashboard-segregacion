@@ -150,9 +150,10 @@ else if (estado === 'NOOK') nook++;
 else pend++;
 });
 
-// Procesar pallets de altura (columnas R-U por índice)
+// Procesar pallets de altura (solo hoja Altura)
 var palletsMap = {};
 rows.forEach(function(r) {
+if (r._sheet !== 'Altura') return;
 var keys = Object.keys(r);
 var loc = '', okNook = '';
 for (var i = 0; i < keys.length; i++) {
@@ -165,7 +166,6 @@ if (keys[i] === 'ok/nook' && val && val.trim()) {
 okNook = val.trim().toLowerCase();
 }
 }
-// Si la columna R (locs duplicada) tiene dato, usarla
 var allKeys = Object.keys(r);
 if (allKeys.length >= 18) {
 var locR = (r[allKeys[17]] || '').trim();
