@@ -20,7 +20,7 @@ h1{font-size:28px;margin-bottom:4px;color:#1a1a2e}
 .card.ok .num{color:#2ec4b6}.card.ok{border-left-color:#2ec4b6}
 .card.pending .num{color:#ff9f1c}.card.pending{border-left-color:#ff9f1c}
 .card.nook .num{color:#e63946}.card.nook{border-left-color:#e63946}
-.card.avance .num{color:#9b59b6}.card.avance{border-left-color:#9b59b6}
+.card.avance .num{color:#9b59b6;font-size:24px}.card.avance{border-left-color:#9b59b6}
 .card.piso .num{color:#f39c12}.card.piso{border-left-color:#f39c12}
 .card.altura .num{color:#3498db}.card.altura{border-left-color:#3498db}
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
@@ -195,7 +195,8 @@ document.getElementById('summaryWrap').classList.remove('hidden');
 
 // Actualizar avance de pallets
 var pct = palletsTotal > 0 ? Math.round((palletsDone / palletsTotal) * 100) : 0;
-document.getElementById('avancePallets').textContent = palletsDone + '/' + palletsTotal + ' (' + pct + '%)';
+var restan = palletsTotal - palletsDone;
+document.getElementById('avancePallets').textContent = palletsDone + '/' + palletsTotal + ' (' + pct + '%) - Quedan ' + restan;
 
 document.getElementById('totalSku').textContent = total;
 document.getElementById('okSku').textContent = ok;
