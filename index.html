@@ -21,6 +21,8 @@ h1{font-size:28px;margin-bottom:4px;color:#1a1a2e}
 .card.pending .num{color:#ff9f1c}.card.pending{border-left-color:#ff9f1c}
 .card.nook .num{color:#e63946}.card.nook{border-left-color:#e63946}
 .card.avance .num{color:#9b59b6}.card.avance{border-left-color:#9b59b6}
+.card.piso .num{color:#f39c12}.card.piso{border-left-color:#f39c12}
+.card.altura .num{color:#3498db}.card.altura{border-left-color:#3498db}
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
 @media(max-width:768px){.charts-row{grid-template-columns:1fr}}
 .chart-box{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -71,6 +73,8 @@ tr:hover{background:#f8f9ff}
 <div class="card ok"><div class="label">Segregados OK</div><div class="num" id="okSku">-</div></div>
 <div class="card pending"><div class="label">Pendientes</div><div class="num" id="pendSku">-</div></div>
 <div class="card nook"><div class="label">Problemas (NOOK)</div><div class="num" id="nookSku">-</div></div>
+<div class="card piso"><div class="label">Piso (ok/total)</div><div class="num" id="pisoStats">-</div></div>
+<div class="card altura"><div class="label">Altura (ok/total)</div><div class="num" id="alturaStats">-</div></div>
 <div class="card avance"><div class="label">Avance Pallets</div><div class="num" id="avancePallets">-</div></div>
 </div>
 
@@ -122,12 +126,15 @@ function processRows(rows) {
 if (!rows || rows.length < 2) throw new Error('Sin datos');
 
 var total = 0, ok = 0, nook = 0, pend = 0;
+var pisoTotal = 0, pisoOk = 0, alturaTotal = 0, alturaOk = 0;
 var dateCounts = {}, lastDate = '', okRows = [];
 
 rows.forEach(function(r) {
 if (!r.Artículo) return;
 total++;
 var estado = ((r.OB || r.ob || '')).trim().toUpperCase();
+var sheet = r._sheet === 'Piso' ? 'Piso' : 'Altura';
+if (sheet === 'Piso') { pisoTotal++; } else { alturaTotal++; }
 var fecha = ((r.FECHA || r.fecha || '')).trim();
 var parts = fecha.split('/');
 if (parts.length === 3) {
@@ -138,7 +145,7 @@ fecha = parts.join('/');
 if (estado === 'OK' || estado === 'NOOK') {
 if (fecha) dateCounts[fecha] = (dateCounts[fecha] || 0) + 1;
 }
-if (estado === 'OK') { ok++; okRows.push(r); if (fecha > lastDate) lastDate = fecha; }
+if (estado === 'OK') { ok++; okRows.push(r); if (fecha > lastDate) lastDate = fecha; if (sheet === 'Piso') { pisoOk++; } else { alturaOk++; } }
 else if (estado === 'NOOK') nook++;
 else pend++;
 });
@@ -190,6 +197,8 @@ document.getElementById('totalSku').textContent = total;
 document.getElementById('okSku').textContent = ok;
 document.getElementById('pendSku').textContent = pend;
 document.getElementById('nookSku').textContent = nook;
+document.getElementById('pisoStats').textContent = pisoOk + '/' + pisoTotal;
+document.getElementById('alturaStats').textContent = alturaOk + '/' + alturaTotal;
 document.getElementById('statusBar').innerHTML = 'Google Sheets (Altura + Piso) conectado | ' + total + ' SKUs | &Uacute;ltima segregaci&oacute;n: ' + (lastDate || 'N/A');
 
 var dateSummary = {};
